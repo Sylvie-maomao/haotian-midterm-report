@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>皓添期中考试错因分析报告</title>
+  <style>
+    :root {
+      --bg: #f4f5f3;
+      --paper: #ffffff;
+      --panel: #f0f1ef;
+      --ink: #202625;
+      --muted: #66706d;
+      --line: #cfd3d0;
+      --green: #3f665a;
+      --green-soft: #e5ece8;
+      --red: #965247;
+      --red-soft: #f2e8e5;
+      --gold: #8a6e38;
+      --gold-soft: #f0ecdf;
+      --nav: #2d3432;
+      --sans: "Avenir Next", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      --serif: "Iowan Old Style", "Songti SC", "STSong", serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.65;
+      letter-spacing: 0;
+    }
+    a { color: inherit; }
+    code {
+      padding: 1px 5px;
+      border: 1px solid var(--line);
+      background: #f7f8f7;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: .92em;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 236px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+    .side-nav {
+      position: sticky;
+      top: 0;
+      align-self: start;
+      height: 100vh;
+      padding: 28px 18px;
+      color: #edf0ee;
+      background: var(--nav);
+      overflow-y: auto;
+    }
+    .side-nav .brand {
+      margin: 0 0 5px;
+      font: 600 22px/1.25 var(--serif);
+    }
+    .side-nav .meta {
+      margin-bottom: 22px;
+      color: #bfc8c4;
+      font-size: 12px;
+    }
+    .side-nav a {
+      display: block;
+      padding: 8px 10px;
+      border-left: 3px solid transparent;
+      color: #dce2df;
+      text-decoration: none;
+      font-size: 13px;
+    }
+    .side-nav a:hover {
+      border-left-color: #c99b74;
+      background: rgba(255,255,255,.07);
+    }
+    main {
+      width: min(1160px, 100%);
+      padding: 34px 38px 70px;
+    }
+    .hero {
+      margin-bottom: 20px;
+      padding: 24px 28px;
+      border-left: 5px solid var(--green);
+      background: var(--paper);
+    }
+    .hero h1 {
+      margin: 0 0 6px;
+      font: 600 32px/1.25 var(--serif);
+    }
+    .hero p { margin: 0; color: var(--muted); }
+    .status-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      margin-top: 14px;
+      font-size: 13px;
+    }
+    .section-tabs {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      display: flex;
+      gap: 1px;
+      margin: 0 0 18px;
+      border: 1px solid var(--line);
+      background: var(--line);
+      overflow-x: auto;
+    }
+    .section-tabs a {
+      flex: 0 0 auto;
+      padding: 9px 13px;
+      background: #f8f9f8;
+      color: #37403d;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    section {
+      margin-bottom: 20px;
+      padding: 24px 28px;
+      border-left: 4px solid #aeb5b1;
+      background: var(--paper);
+      scroll-margin-top: 56px;
+    }
+    section > h2 {
+      margin: 0 0 16px;
+      font: 600 25px/1.3 var(--serif);
+    }
+    h3 {
+      margin: 22px 0 10px;
+      font-size: 18px;
+      line-height: 1.35;
+    }
+    h4 { margin: 18px 0 8px; font-size: 15px; }
+    p { margin: 8px 0 12px; }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .fact {
+      min-height: 114px;
+      padding: 15px 16px;
+      border: 1px solid var(--line);
+      background: #fafbfa;
+    }
+    .fact strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--green);
+      font: 700 24px/1.2 var(--serif);
+    }
+    .fact b { display: block; margin-bottom: 4px; }
+    .note, .warning, .finding {
+      margin: 14px 0;
+      padding: 12px 14px;
+      border-left: 4px solid var(--green);
+      background: var(--green-soft);
+    }
+    .warning { border-left-color: var(--gold); background: var(--gold-soft); }
+    .finding { border-left-color: var(--red); background: var(--red-soft); }
+    .dense-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .dense-table th,
+    .dense-table td {
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+    }
+    .dense-table th {
+      background: #ecefec;
+      font-weight: 800;
+    }
+    .dense-table tr:nth-child(even) td { background: #fafbfa; }
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .score-card {
+      padding: 14px;
+      border: 1px solid var(--line);
+      background: #fafbfa;
+    }
+    .score-card .label { color: var(--muted); font-size: 12px; font-weight: 800; }
+    .score-card .band {
+      margin: 4px 0;
+      color: var(--green);
+      font: 700 29px/1.1 var(--serif);
+    }
+    .score-card.na .band { color: var(--gold); font-size: 23px; }
+    .score-card.risk .band { color: var(--red); }
+    .score-card p { margin: 6px 0 0; font-size: 12px; line-height: 1.5; }
+    .bar-list { display: grid; gap: 8px; }
+    .bar-row {
+      display: grid;
+      grid-template-columns: 150px minmax(0, 1fr) 58px;
+      align-items: center;
+      gap: 10px;
+    }
+    .bar-track { height: 15px; background: #e5e8e6; }
+    .bar-fill { height: 100%; background: var(--green); }
+    .bar-fill.risk { background: var(--red); }
+    .bar-fill.mid { background: var(--gold); }
+    .bar-value { font-size: 12px; font-weight: 800; text-align: right; }
+    .error-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .error-item {
+      padding: 13px 14px;
+      border-left: 4px solid var(--red);
+      background: #f7f3f2;
+    }
+    .error-item b { display: block; margin-bottom: 4px; }
+    .error-item p { margin: 0; font-size: 13px; }
+    figure {
+      margin: 16px 0 4px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      background: #f7f8f7;
+    }
+    figure img {
+      display: block;
+      width: 100%;
+      max-height: 720px;
+      object-fit: contain;
+      background: #fff;
+    }
+    figcaption {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .evidence-grid figure { margin: 0; }
+    .priority {
+      counter-reset: priority;
+      display: grid;
+      gap: 10px;
+      padding: 0;
+      list-style: none;
+    }
+    .priority li {
+      position: relative;
+      padding: 12px 14px 12px 50px;
+      border: 1px solid var(--line);
+      background: #fafbfa;
+    }
+    .priority li::before {
+      counter-increment: priority;
+      content: counter(priority);
+      position: absolute;
+      left: 14px;
+      top: 11px;
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      color: white;
+      background: var(--green);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+    .nowrap { white-space: nowrap; }
+
+    @media (max-width: 920px) {
+      .layout { display: block; }
+      .side-nav { position: static; width: 100%; height: auto; padding: 18px; }
+      .side-nav a { display: inline-block; }
+      main { padding: 22px 16px 50px; }
+      .summary, .score-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 620px) {
+      .hero, section { padding: 18px 16px; }
+      .hero h1 { font-size: 26px; }
+      .summary, .score-grid, .error-list, .evidence-grid { grid-template-columns: 1fr; }
+      .bar-row { grid-template-columns: 105px minmax(0, 1fr) 50px; }
+      .table-wrap { overflow-x: auto; }
+      .dense-table { min-width: 720px; }
+    }
+    @media print {
+      body { background: white; }
+      .layout { display: block; }
+      .side-nav, .section-tabs { display: none; }
+      main { width: auto; padding: 0; }
+      .hero, section { break-inside: avoid; box-shadow: none; }
+      section { border: 1px solid var(--line); }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="side-nav">
+      <div class="brand">皓添期中考试</div>
+      <div class="meta">错因分析 · 听说读写 · 参考雅思评价框架</div>
+      <a href="#summary">阅读摘要</a>
+      <a href="#method">评分口径</a>
+      <a href="#skills">听说读写评分</a>
+      <a href="#reading">阅读错题</a>
+      <a href="#language">语法与词汇</a>
+      <a href="#writing">写作分析</a>
+      <a href="#spelling">拼写统计</a>
+      <a href="#priority">教学优先顺序</a>
+      <a href="#evidence">证据与来源</a>
+    </aside>
+
+    <main>
+      <header class="hero">
+        <h1>皓添期中考试错因分析报告</h1>
+        <p>依据 8 张试卷原题照片与 2 张答题卡，对分数、错题和作文逐项复核。</p>
+        <div class="status-line">
+          <span><b>考试范围：</b>Unit 1–3</span>
+          <span><b>卷面总分：</b>68.5 / 100</span>
+          <span><b>分析方式：</b>校内原始分 + 参考雅思评价维度</span>
+        </div>
+      </header>
+
+      <nav class="section-tabs">
+        <a href="#skills">听说读写</a>
+        <a href="#reading">阅读</a>
+        <a href="#language">语法词汇</a>
+        <a href="#writing">写作</a>
+        <a href="#spelling">拼写</a>
+      </nav>
+
+      <section id="summary">
+        <h2>阅读摘要</h2>
+        <div class="summary">
+          <div class="fact">
+            <strong>听力前段较稳</strong>
+            <b>听力 11 / 15</b>
+            判断题和前三道选择题正确，最后两道选择题错误，失分集中在听力末段。
+          </div>
+          <div class="fact">
+            <strong>阅读“表层强、推断弱”</strong>
+            <b>阅读理解 22 / 30</b>
+            直接定位和词义判断较好，失分集中在双条件匹配、数据作用、跨句推断和作者意图。
+          </div>
+          <div class="fact">
+            <strong>输出准确性是主瓶颈</strong>
+            <b>词汇 4 / 10，语法 9 / 15</b>
+            已认识部分单词和规则，但一进入完整句子，就容易在搭配、时态、冠词和主谓一致上失分。
+          </div>
+        </div>
+
+        <div class="finding">
+          <b>核心判断：</b>皓添并非“完全看不懂”。他能抓住大部分明确信息，也能围绕题目写出基本内容；真正拉低成绩的是把已学知识稳定地放进句子和语篇的能力。难度从“认出答案”升级到“根据语境选词、解释逻辑、自己造句”时，准确率明显下降。
+        </div>
+
+        <div class="table-wrap">
+          <table class="dense-table">
+            <thead>
+              <tr>
+                <th>卷面模块</th>
+                <th>计分</th>
+                <th>表现</th>
+                <th>主要问题</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>听力</td>
+                <td class="nowrap">11 / 15</td>
+                <td>中等偏上</td>
+                <td>Q1–Q8 正确，最后两道听后选择 Q9–Q10 错误；没有考听写拼写。</td>
+              </tr>
+              <tr>
+                <td>选词填空</td>
+                <td class="nowrap">4 / 10</td>
+                <td>弱</td>
+                <td>语境选词、固定搭配、动词形式不稳定。</td>
+              </tr>
+              <tr>
+                <td>单项选择</td>
+                <td class="nowrap">9 / 15</td>
+                <td>中等偏弱</td>
+                <td>现在完成时、过去时、冠词、副词比较级。</td>
+              </tr>
+              <tr>
+                <td>完形填空</td>
+                <td class="nowrap">15 / 15</td>
+                <td>强</td>
+                <td>根据总分算式与听力最后两题失分重新归属，完形为 15 分。</td>
+              </tr>
+              <tr>
+                <td>阅读理解</td>
+                <td class="nowrap">22 / 30</td>
+                <td>中等偏上</td>
+                <td>Q2、Q12、Q14、Q15，均涉及多个条件或篇章层逻辑。</td>
+              </tr>
+              <tr>
+                <td>写作</td>
+                <td class="nowrap">计入 7.5 / 15</td>
+                <td>弱</td>
+                <td>任务能完成，但语法错误密集、衔接松散、表达重复。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="method">
+        <h2>评分口径</h2>
+        <p>本报告把两套分数分开处理：</p>
+        <div class="error-list">
+          <div class="error-item">
+            <b>校内原始分</b>
+            <p>直接依据答题卡。顶部算式可读为 <code>11 + 22 + 15 + 9 + 4 + 7.5 = 68.5</code>。结合“听后选择最后两题错误”的确认信息，本报告按“听力 11、阅读 22、完形 15、语法 9、词汇 4、写作 7.5”解释。</p>
+          </div>
+          <div class="error-item">
+            <b>雅思评价框架</b>
+            <p>只借用雅思对听、说、读、写的评价维度，例如信息捕捉、长句理解、任务回应、连贯、词汇、语法和发音。不使用雅思 9 分制，也不把校内分数换算成雅思成绩。</p>
+          </div>
+        </div>
+        <div class="warning">
+          写作评分格中另有接近“10 / 15”的红笔痕迹，但顶部总分算式按 7.5 计入。报告以 68.5 的总分算式为统计口径，并保留这一分数差异。口语没有录音、评分表或教师记录，因此不虚构口语分。
+        </div>
+      </section>
+
+      <section id="skills">
+        <h2>听说读写：参考雅思评价框架</h2>
+        <div class="score-grid">
+          <div class="score-card">
+            <div class="label">听力 Listening</div>
+            <div class="band">较稳</div>
+            <p>Q1–Q8 正确；Q9–Q10 错误，末段持续跟听和干扰项排除需要加强。</p>
+          </div>
+          <div class="score-card na">
+            <div class="label">口语 Speaking</div>
+            <div class="band">未测</div>
+            <p>缺少录音，流利度、发音和实时组织能力均无法从卷面判断。</p>
+          </div>
+          <div class="score-card">
+            <div class="label">阅读 Reading</div>
+            <div class="band">中等偏上</div>
+            <p>显性信息定位较稳；多条件整合、长句逻辑和作者意图明显较弱。</p>
+          </div>
+          <div class="score-card risk">
+            <div class="label">写作 Writing</div>
+            <div class="band">需加强</div>
+            <p>能回应题目，但语法错误频繁，词语搭配和句间衔接限制表达清晰度。</p>
+          </div>
+        </div>
+
+        <h3>听力小维度</h3>
+        <div class="table-wrap">
+          <table class="dense-table">
+            <thead><tr><th>参考维度</th><th>表现</th><th>卷面证据</th><th>判断</th></tr></thead>
+            <tbody>
+              <tr><td>主旨与事实细节</td><td>较稳</td><td>Q1–Q8 正确，能完成判断和前三道选择。</td><td>能跟住前段信息主线。</td></tr>
+              <tr><td>同义替换识别</td><td>较稳</td><td><code>digital pickled vegetables</code>、节目类型等题目能正确对应。</td><td>主题词识别较好。</td></tr>
+              <tr><td>末段持续跟踪</td><td>需加强</td><td>最后两道听后选择 Q9、Q10 均错误。</td><td>信息累积到末段后，准确率下降。</td></tr>
+              <tr><td>干扰项排除</td><td>需加强</td><td>失分集中在最后两个三选一题。</td><td>需要区分“听到的词”和“真正回答问题的信息”。</td></tr>
+              <tr><td>听写与拼写</td><td>未测</td><td>本卷没有听力填空。</td><td>不能用选择题成绩代替拼写能力。</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>阅读小维度</h3>
+        <div class="bar-list">
+          <div class="bar-row"><span>显性信息定位</span><div class="bar-track"><div class="bar-fill" style="width:78%"></div></div><span class="bar-value">稳定</span></div>
+          <div class="bar-row"><span>词义语境判断</span><div class="bar-track"><div class="bar-fill" style="width:72%"></div></div><span class="bar-value">较稳</span></div>
+          <div class="bar-row"><span>多条件整合</span><div class="bar-track"><div class="bar-fill mid" style="width:61%"></div></div><span class="bar-value">一般</span></div>
+          <div class="bar-row"><span>长句与逻辑关系</span><div class="bar-track"><div class="bar-fill risk" style="width:56%"></div></div><span class="bar-value">需加强</span></div>
+          <div class="bar-row"><span>作者意图与主旨</span><div class="bar-track"><div class="bar-fill risk" style="width:50%"></div></div><span class="bar-value">需加强</span></div>
+        </div>
+
+        <h3>写作小维度</h3>
+        <div class="table-wrap">
+          <table class="dense-table">
+            <thead><tr><th>参考维度</th><th>表现</th><th>证据</th></tr></thead>
+            <tbody>
+              <tr><td>任务回应 Task Response</td><td>基本完成</td><td>写了人物、外貌/身份、欣赏原因和学习点，但理由重复、展开不足。</td></tr>
+              <tr><td>连贯与衔接 Coherence &amp; Cohesion</td><td>需加强</td><td>主要依靠 <code>and</code>、<code>but</code>、<code>so</code> 串联，句子边界不稳，部分关系跳跃。</td></tr>
+              <tr><td>词汇资源 Lexical Resource</td><td>需加强</td><td>能使用 <code>positive</code>、<code>admire</code>、<code>dream</code>，但搭配错误和重复较多。</td></tr>
+              <tr><td>语法范围与准确性 Grammar</td><td>明显需加强</td><td>主谓一致、冠词、从句结构和语序错误高频，影响句子自然度。</td></tr>
+              <tr><td>拼写与标点（补充）</td><td>基本可辨</td><td><code>alot</code> 重复出现；大小写和标点不稳定，但拼写并非最大失分源。</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>口语小维度</h3>
+        <p class="muted">流利度与连贯性、词汇资源、语法范围与准确性、发音四项均标记为“未测”。作文只能提示口语中可能出现相同的语法风险，不能替代真实口语评分。</p>
+      </section>
+
+      <section id="reading">
+        <h2>阅读错题：错在信息整合与篇章判断</h2>
+        <div class="table-wrap">
+          <table class="dense-table">
+            <thead>
+              <tr><th>题号</th><th>学生答案</th><th>正确答案</th><th>具体错因</th><th>对应能力</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Q2</td><td>A</td><td>D</td>
+                <td>只看到“历史”就选择长城，漏掉 Mary 还要求“traditional Chinese clothing”；D 同时满足兵马俑和汉服两个条件。</td>
+                <td>多条件同时保留</td>
+              </tr>
+              <tr>
+                <td>Q12</td><td>A</td><td>D</td>
+                <td>把“数字内容”误当成“数字的写作作用”。第二段连续列比例和热量，是为了强调含糖饮料摄入不断增加。</td>
+                <td>识别举例/数据的功能</td>
+              </tr>
+              <tr>
+                <td>Q14</td><td>C</td><td>A</td>
+                <td>文章明确比较整颗苹果和果汁：整颗苹果有纤维帮助代谢，因此吃苹果比喝苹果汁更健康。学生选择了较泛的“适量饮用”。</td>
+                <td>跨句比较与具体推断</td>
+              </tr>
+              <tr>
+                <td>Q15</td><td>A</td><td>C</td>
+                <td>学生抓到“风险”，但漏读结尾 <code>drink in moderation</code>；作者最终目的不是让人完全恐惧饮料，而是建议合理限制摄入。</td>
+                <td>作者意图与全文主旨</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="finding">
+          四道错题没有集中在生词，而是集中在“一个答案要同时满足多个条件”和“作者为什么这样写”。这说明皓添的阅读下一步不应只做更多查词，而要训练信号词、证据范围和选项精确度。
+        </div>
+        <figure>
+          <a href="皓添期中考试分析报告_资源/05_阅读长句与主旨原题.webp"><img src="皓添期中考试分析报告_资源/05_阅读长句与主旨原题.webp" alt="阅读第12至15题原题"></a>
+          <figcaption>证据：Passage D 的 Q12–Q15。点击图片可查看大图。</figcaption>
+        </figure>
+      </section>
+
+      <section id="language">
+        <h2>语法与词汇：规则认识了，但没有稳定进入句子</h2>
+        <h3>语法选择的六类关键错误</h3>
+        <div class="table-wrap">
+          <table class="dense-table">
+            <thead><tr><th>题目</th><th>学生选择</th><th>正确表达</th><th>错误机制</th></tr></thead>
+            <tbody>
+              <tr><td>Q3</td><td><code>have made</code></td><td><code>has made</code></td><td><code>since</code> 判断出现在完成时后，仍漏掉单数主语 <code>The scientist</code> 对助动词的限制。</td></tr>
+              <tr><td>Q4</td><td><code>has studied</code></td><td><code>studied</code></td><td><code>three years ago</code> 是明确过去时间，不能用现在完成时。</td></tr>
+              <tr><td>Q6</td><td><code>did</code></td><td><code>do</code></td><td><code>every day</code> 表示习惯，且主语是 <code>I</code>。</td></tr>
+              <tr><td>Q8</td><td>错误冠词</td><td><code>an orange cat</code></td><td>冠词按发音判断，<code>orange</code> 以元音音素开头。</td></tr>
+              <tr><td>Q9</td><td><code>an; a</code></td><td><code>an; the</code></td><td>首次提到博物馆用 <code>an</code>；年代固定表达为 <code>the 1860s</code>。</td></tr>
+              <tr><td>Q13</td><td><code>politely</code></td><td><code>more politely</code></td><td><code>Compared with</code> 已经给出比较关系，需要副词比较级。</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>选词填空的错误链</h3>
+        <div class="table-wrap">
+          <table class="dense-table">
+            <thead><tr><th>句子线索</th><th>学生答案</th><th>正确答案</th><th>问题性质</th></tr></thead>
+            <tbody>
+              <tr><td><code>have had a ___ influence</code></td><td><code>lose</code></td><td><code>positive</code></td><td>没有识别固定搭配 <code>positive influence</code>。</td></tr>
+              <tr><td><code>have ___ their lives</code></td><td><code>realise</code></td><td><code>lost</code></td><td>词义选择错误，同时漏掉 <code>lose → lost</code> 的过去分词变化。</td></tr>
+              <tr><td><code>didn't ___ it was so late</code></td><td><code>form</code></td><td><code>realise</code></td><td>没有利用后接宾语从句的句型线索。</td></tr>
+              <tr><td><code>___ a reputation</code></td><td><code>tired</code></td><td><code>got</code></td><td>固定搭配不熟，且没有检查词性。</td></tr>
+              <tr><td><code>___ an opinion</code></td><td><code>get</code></td><td><code>form</code></td><td>混淆 <code>get</code> 与 <code>form</code> 的常见搭配。</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="finding">
+          这些错误不是单纯“单词没背过”。词表中的词大多见过，失分发生在三个步骤：先判断空格需要什么词性，再根据前后搭配缩小范围，最后按时态和单复数变形。皓添目前经常直接从词表里挑一个“看起来认识”的词，跳过了句子验证。
+        </div>
+      </section>
+
+      <section id="writing">
+        <h2>写作：内容可理解，但句子准确性不足</h2>
+        <p>作文能够围绕父亲展开，也写到了外貌/身份、相处、梦想和学习点，说明任务意识存在。主要失分不在“没有内容”，而在句子组织和语言准确性。</p>
+
+        <div class="table-wrap">
+          <table class="dense-table">
+            <thead><tr><th>原文片段</th><th>建议改为</th><th>错误类型</th></tr></thead>
+            <tbody>
+              <tr><td><code>The person i admire is my dad.</code></td><td><code>The person I admire is my dad.</code></td><td>代词 <code>I</code> 必须大写。</td></tr>
+              <tr><td><code>He is a film character.</code></td><td><code>He is a film director.</code></td><td>结合教师订正，属于身份词误用。</td></tr>
+              <tr><td><code>He always work alot of time.</code></td><td><code>He always works very hard.</code></td><td>主谓一致、搭配、词间空格。</td></tr>
+              <tr><td><code>work more hardly</code></td><td><code>work harder</code></td><td><code>hardly</code> 意为“几乎不”，不是 <code>hard</code> 的比较级。</td></tr>
+              <tr><td><code>He usually play with me.</code></td><td><code>He usually plays with me.</code></td><td>第三人称单数。</td></tr>
+              <tr><td><code>he know where can we play</code></td><td><code>he knows where we can play</code></td><td>主谓一致 + 宾语从句陈述语序。</td></tr>
+              <tr><td><code>He also want to play alot.</code></td><td><code>He also wants to play a lot.</code></td><td>第三人称单数 + 拼写/词间空格。</td></tr>
+              <tr><td><code>he has dream</code></td><td><code>he has a dream</code></td><td>可数名词单数前缺冠词。</td></tr>
+              <tr><td><code>dream make he work hard</code></td><td><code>His dream makes him work hard.</code></td><td>限定词、主谓一致、宾格代词。</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>错误频率概览</h3>
+        <p class="small muted">以下为卷面可确认例次；同一个句子可能同时计入两个维度。</p>
+        <div class="bar-list">
+          <div class="bar-row"><span>主谓一致</span><div class="bar-track"><div class="bar-fill risk" style="width:100%"></div></div><span class="bar-value">至少 6</span></div>
+          <div class="bar-row"><span>词义与搭配</span><div class="bar-track"><div class="bar-fill risk" style="width:83%"></div></div><span class="bar-value">至少 5</span></div>
+          <div class="bar-row"><span>冠词</span><div class="bar-track"><div class="bar-fill mid" style="width:67%"></div></div><span class="bar-value">至少 4</span></div>
+          <div class="bar-row"><span>从句与语序</span><div class="bar-track"><div class="bar-fill mid" style="width:50%"></div></div><span class="bar-value">至少 3</span></div>
+          <div class="bar-row"><span>时态与时间标志</span><div class="bar-track"><div class="bar-fill mid" style="width:50%"></div></div><span class="bar-value">至少 3</span></div>
+          <div class="bar-row"><span>拼写/词间空格</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="bar-value">至少 3</span></div>
+        </div>
+      </section>
+
+      <section id="spelling">
+        <h2>拼写统计：高频问题少于语法和搭配问题</h2>
+        <div class="table-wrap">
+          <table class="dense-table">
+            <thead><tr><th>卷面写法</th><th>正确写法</th><th>确认次数</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td><code>alot</code></td><td><code>a lot</code></td><td>2</td><td>本次最明确、出现最多的拼写/词间空格错误。</td></tr>
+              <tr><td><code>usally</code></td><td><code>usually</code></td><td>1</td><td>漏写 <code>u</code>，可按音节 <code>u-su-al-ly</code> 记忆。</td></tr>
+              <tr><td><code>looklike</code></td><td><code>look like</code></td><td>1（字迹较弱）</td><td>可能存在连写；按“动词 + 介词”分开检查。</td></tr>
+              <tr><td>小写 <code>i</code></td><td>大写 <code>I</code></td><td>1</td><td>严格说属于大小写规则，不是单词拼写。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note">
+          <b>需要纠正一个直觉：</b>这次考试并不是“拼写错太多”导致低分。可确认的重复拼写错误主要是 <code>alot</code>。更大的失分来自“单词放错位置”或“形式没有变化”，例如 <code>lose → lost</code>、<code>form an opinion</code>、<code>get a reputation</code>。训练重点应先放在完整句和搭配，而不是只抄单词。
+        </div>
+      </section>
+
+      <section id="priority">
+        <h2>教学优先顺序</h2>
+        <ol class="priority">
+          <li><b>先修主谓一致和冠词。</b>这些错误同时出现在选择题和作文里，说明不是粗心，而是尚未形成自动检查习惯。</li>
+          <li><b>把词汇改成“搭配 + 完整句”学习。</b>优先复现 <code>positive influence</code>、<code>lose one's life</code>、<code>realise that...</code>、<code>get a reputation</code>、<code>form an opinion</code>。</li>
+          <li><b>阅读专练“两个条件”和“作者为什么这样写”。</b>每题必须圈出全部条件，并说明数字、例子、转折或结尾句的作用。</li>
+          <li><b>补一次 90 秒口语样本。</b>使用同一题目 “The Person I Admire”，才能补齐流利度、发音、实时语法和词汇四项评分。</li>
+        </ol>
+      </section>
+
+      <section id="evidence">
+        <h2>证据与来源</h2>
+        <div class="evidence-grid">
+          <figure>
+            <a href="皓添期中考试分析报告_资源/01_总分与听力证据.webp"><img src="皓添期中考试分析报告_资源/01_总分与听力证据.webp" alt="总分与听力答题卡"></a>
+            <figcaption>答题卡顶部总分算式与听力作答。</figcaption>
+          </figure>
+          <figure>
+            <a href="皓添期中考试分析报告_资源/02_词汇答题证据.webp"><img src="皓添期中考试分析报告_资源/02_词汇答题证据.webp" alt="词汇答题证据"></a>
+            <figcaption>选词填空、订正痕迹与 4 / 10 分项。</figcaption>
+          </figure>
+          <figure>
+            <a href="皓添期中考试分析报告_资源/03_语法与完形答题证据.webp"><img src="皓添期中考试分析报告_资源/03_语法与完形答题证据.webp" alt="语法与完形答题证据"></a>
+            <figcaption>单项选择和完形答题卡。</figcaption>
+          </figure>
+          <figure>
+            <a href="皓添期中考试分析报告_资源/04_阅读答题证据.webp"><img src="皓添期中考试分析报告_资源/04_阅读答题证据.webp" alt="阅读答题证据"></a>
+            <figcaption>阅读选择与教师批改痕迹。</figcaption>
+          </figure>
+          <figure>
+            <a href="皓添期中考试分析报告_资源/06_写作原文证据.webp"><img src="皓添期中考试分析报告_资源/06_写作原文证据.webp" alt="写作原文证据"></a>
+            <figcaption>作文原文及教师订正。</figcaption>
+          </figure>
+          <figure>
+            <a href="皓添期中考试分析报告_资源/08_语法原题与订正.webp"><img src="皓添期中考试分析报告_资源/08_语法原题与订正.webp" alt="语法原题与订正"></a>
+            <figcaption>语法原题上的选择和订正痕迹。</figcaption>
+          </figure>
+        </div>
+
+        <h3>资料清单</h3>
+        <p class="small">[1] 《明诚外国语学校 2026–2027 学年度第一学期六年级（国内）期中质量检测》试卷照片，8 张。</p>
+        <p class="small">[2] 皓添期中考试答题卡，2 张。</p>
+        <p class="small muted">所有结论仅依据本地试卷、答题卡和可辨认批改痕迹；未使用外部成绩或推测性口语数据。</p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
